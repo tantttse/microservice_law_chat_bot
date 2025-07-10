@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnamese Traffic Law Chatbot API Test Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .section-header:hover {
+            background: #e9ecef;
+        }
+
+        .section-header h2 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header .toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s;
+        }
+
+        .section-header.active .toggle {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .endpoint-header {
+            background: #495057;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .method {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .method.get {
+            background: #28a745;
+        }
+
+        .method.post {
+            background: #007bff;
+        }
+
+        .method.put {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .method.delete {
+            background: #dc3545;
+        }
+
+        .endpoint-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .response-body {
+            background: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .auth-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e0e0e0;
+            z-index: 1000;
+        }
+
+        .auth-status.authenticated {
+            border-color: #28a745;
+        }
+
+        .auth-status.unauthenticated {
+            border-color: #dc3545;
+        }
+
+        .guest-session {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .guest-session h4 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .guest-session p {
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .copy-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .copy-button:hover {
+            background: #5a6268;
+        }
+
+        .config-section {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .config-section h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .config-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .config-row .form-group {
+            flex: 1;
+        }
+
+        .config-row .button {
+            margin-bottom: 0;
+        }
+
+        /* Streaming Chat Styles */
+        .streaming-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .streaming-response {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Segoe UI', sans-serif;
+            line-height: 1.5;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .streaming-response.active {
+            border-left: 3px solid #667eea;
+            background: #fff;
+        }
+
+        .streaming-response .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: #667eea;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .streaming-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .streaming-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .streaming-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Vietnamese Traffic Law Chatbot</h1>
+            <p>API Test Client - Test all endpoints with a beautiful interface</p>
+        </div>
+
+        <div class="content">
+            <!-- Configuration Section -->
+            <div class="config-section">
+                <h3>⚙️ Configuration</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="baseUrl">Base URL:</label>
+                        <input type="text" id="baseUrl" value="http://localhost:3000">
+                    </div>
+                    <button class="button" onclick="updateBaseUrl()">Update</button>
+                </div>
+            </div>
+
+            <!-- Authentication Status -->
+            <div class="auth-status unauthenticated" id="authStatus">
+                <div><strong>🔒 Status:</strong> <span id="authStatusText">Not Authenticated</span></div>
+                <div><strong>👤 User:</strong> <span id="currentUser">None</span></div>
+                <div><strong>🎫 Token:</strong> <span id="tokenStatus">None</span></div>
+            </div>
+
+            <!-- Guest Session Info -->
+            <div class="guest-session" id="guestSession" style="display: none;">
+                <h4>🎭 Guest Session Active</h4>
+                <p>Guest Session ID: <span id="guestSessionId">None</span></p>
+                <p>Guest conversations are temporary and will be cleared after 1 hour of inactivity.</p>
+                <button class="copy-button" onclick="copyGuestId()">Copy ID</button>
+                <button class="copy-button" onclick="clearGuestSession()" style="background: #dc3545;">Clear
+                    Session</button>
+            </div>
+
+            <!-- Authentication Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('auth')">
+                    <h2>🔐 Authentication <span class="toggle">▼</span></h2>
+                </div>
+                <div class="section-content" id="auth">
+                    <!-- Register -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/auth/register</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <input type="email" id="register-email" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label>First Name:</label>
+                                <input type="text" id="register-firstName" placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name:</label>
+                                <input type="text" id="register-lastName" placeholder="Enter last name">
+                            </div>
+                            <div class="form-group">
+                                <label>Password:</label>
+                                <input type="password" id="register-password" placeholder="Enter password">
+                            </div>
+                            <button class="button" onclick="register()">Register</button>
+                            <div class="response" id="register-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Login -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/auth/login</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <input type="email" id="login-email" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label>Password:</label>
+                                <input type="password" id="login-password" placeholder="Enter password">
+                            </div>
+                            <button class="button" onclick="login()">Login</button>
+                            <div class="response" id="login-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Get Profile -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/auth/profile</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <button class="button" onclick="getProfile()">Get Profile</button>
+                            <div class="response" id="profile-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Update Profile -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method put">PUT</span>
+                            <span>/auth/profile</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <input type="email" id="update-email" placeholder="Enter new email">
+                            </div>
+                            <div class="form-group">
+                                <label>First Name:</label>
+                                <input type="text" id="update-firstName" placeholder="Enter new first name">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name:</label>
+                                <input type="text" id="update-lastName" placeholder="Enter new last name">
+                            </div>
+                            <button class="button" onclick="updateProfile()">Update Profile</button>
+                            <div class="response" id="update-profile-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/auth/change-password</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Current Password:</label>
+                                <input type="password" id="current-password" placeholder="Enter current password">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password:</label>
+                                <input type="password" id="new-password" placeholder="Enter new password">
+                            </div>
+                            <button class="button" onclick="changePassword()">Change Password</button>
+                            <div class="response" id="change-password-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/auth/logout</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <button class="button" onclick="logout()">Logout</button>
+                            <div class="response" id="logout-response" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatbot Section -->
+            <div class="section">
+                <div class="section-header active" onclick="toggleSection('chatbot')">
+                    <h2>🤖 Chatbot <span class="toggle">▲</span></h2>
+                </div>
+                <div class="section-content active" id="chatbot">
+                    <!-- Chat (Works for both guest and authenticated) -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/chatbot/chat (Regular) | /chatbot/chat/stream (Streaming)</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <!-- Streaming Toggle -->
+                            <div class="streaming-toggle">
+                                <span><strong>💬 Streaming Mode:</strong></span>
+                                <div class="toggle-switch active" id="streamingToggle" onclick="toggleStreaming()">
+                                </div>
+                                <span id="streamingStatus">Enabled (like ChatGPT)</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Message:</label>
+                                <textarea id="chat-message"
+                                    placeholder="Ask about Vietnamese traffic laws..."></textarea>
+                            </div>
+
+                            <!-- RAG Test Buttons -->
+                            <div class="form-group">
+                                <label>🧪 RAG Test Queries:</label>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                    <button class="button"
+                                        style="background: #28a745; font-size: 12px; padding: 8px 12px;"
+                                        onclick="testPenaltyQuery()">📚 Penalty Query (Full Docs)</button>
+                                    <button class="button"
+                                        style="background: #17a2b8; font-size: 12px; padding: 8px 12px;"
+                                        onclick="testGeneralQuery()">🔍 General Query (RAG)</button>
+                                    <button class="button"
+                                        style="background: #6f42c1; font-size: 12px; padding: 8px 12px;"
+                                        onclick="testGreeting()">👋 Greeting Test</button>
+                                    <button class="button"
+                                        style="background: #fd7e14; font-size: 12px; padding: 8px 12px;"
+                                        onclick="testEnglishQuery()">🇬🇧 English Query</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Guest Session ID (Optional for guest mode):</label>
+                                <input type="text" id="chat-guest-session" placeholder="Leave empty for new session">
+                            </div>
+                            <div class="form-group">
+                                <label>Conversation ID (Optional for authenticated users):</label>
+                                <input type="number" id="chat-conversation-id"
+                                    placeholder="Leave empty for new conversation">
+                            </div>
+                            <button class="button" id="sendChatButton" onclick="sendChatMessage()">Send Message</button>
+
+                            <!-- Regular Response -->
+                            <div class="response" id="chat-response" style="display: none;"></div>
+
+                            <!-- Streaming Response -->
+                            <div class="streaming-response" id="streaming-response" style="display: none;">
+                                <div id="streaming-content"></div>
+                            </div>
+
+                            <!-- Typing Indicator -->
+                            <div class="typing-indicator" id="typing-indicator">
+                                <span>🤖 AI is thinking</span>
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+
+                            <!-- Streaming Status -->
+                            <div class="streaming-status" id="streaming-status" style="display: none;">
+                                <span id="status-text">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Get Guest History -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/chatbot/guest/history</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Guest Session ID:</label>
+                                <input type="text" id="guest-history-session" placeholder="Enter guest session ID">
+                            </div>
+                            <button class="button" onclick="getGuestHistory()">Get Guest History</button>
+                            <div class="response" id="guest-history-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Get User Conversations (Authenticated) -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/chatbot/conversations</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <button class="button" onclick="getUserConversations()">Get My Conversations</button>
+                            <div class="response" id="user-conversations-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Get Conversation History (Authenticated) -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/chatbot/conversations/:conversationId/history</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Conversation ID:</label>
+                                <input type="number" id="conversation-history-id" placeholder="Enter conversation ID">
+                            </div>
+                            <button class="button" onclick="getConversationHistory()">Get Conversation History</button>
+                            <div class="response" id="conversation-history-response" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Management Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('documents')">
+                    <h2>📄 Document Management <span class="toggle">▼</span></h2>
+                </div>
+                <div class="section-content" id="documents">
+                    <!-- Upload Document -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/documents/upload</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Title:</label>
+                                <input type="text" id="document-title" placeholder="Enter document title">
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea id="document-description" placeholder="Enter document description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>File (TXT or DOCX):</label>
+                                <input type="file" id="document-file" accept=".txt,.docx">
+                            </div>
+                            <button class="button" onclick="uploadDocument()">Upload Document</button>
+                            <div class="response" id="upload-document-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Get Documents -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/documents</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Page:</label>
+                                <input type="number" id="documents-page" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Limit:</label>
+                                <input type="number" id="documents-limit" value="10" min="1" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Type:</label>
+                                <select id="documents-type">
+                                    <option value="">All Types</option>
+                                    <option value="txt">TXT</option>
+                                    <option value="docx">DOCX</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Active Only:</label>
+                                <select id="documents-active">
+                                    <option value="">All Documents</option>
+                                    <option value="true">Active Only</option>
+                                    <option value="false">Inactive Only</option>
+                                </select>
+                            </div>
+                            <button class="button" onclick="getDocuments()">Get Documents</button>
+                            <div class="response" id="get-documents-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Update Document -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method put">PUT</span>
+                            <span>/documents/:id</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Document ID:</label>
+                                <input type="number" id="update-document-id" placeholder="Enter document ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Title:</label>
+                                <input type="text" id="update-document-title" placeholder="Enter new title">
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea id="update-document-description"
+                                    placeholder="Enter new description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Active:</label>
+                                <select id="update-document-active">
+                                    <option value="">No Change</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                            <button class="button" onclick="updateDocument()">Update Document</button>
+                            <div class="response" id="update-document-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Set Active Documents -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span>/documents/set-active</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Document IDs (comma-separated):</label>
+                                <input type="text" id="active-document-ids" placeholder="e.g., 1,2,3">
+                            </div>
+                            <button class="button" onclick="setActiveDocuments()">Set Active Documents</button>
+                            <div class="response" id="set-active-documents-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Get Active Documents -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/documents/active</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <button class="button" onclick="getActiveDocuments()">Get Active Documents</button>
+                            <div class="response" id="get-active-documents-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Document -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method delete">DELETE</span>
+                            <span>/documents/:id</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Document ID:</label>
+                                <input type="number" id="delete-document-id" placeholder="Enter document ID">
+                            </div>
+                            <button class="button" onclick="deleteDocument()">Delete Document</button>
+                            <div class="response" id="delete-document-response" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Search Documents -->
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span>/documents/search/:query</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <div class="form-group">
+                                <label>Search Query:</label>
+                                <input type="text" id="search-query" placeholder="Enter search terms">
+                            </div>
+                            <button class="button" onclick="searchDocuments()">Search Documents</button>
+                            <div class="response" id="search-documents-response" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let baseUrl = 'http://localhost:3000';
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        let guestSessionId = localStorage.getItem('guestSessionId');
+
+        // Update auth status on page load
+        updateAuthStatus();
+        updateGuestSession();
+
+        // Load existing guest session into the form
+        if (guestSessionId) {
+            document.getElementById('chat-guest-session').value = guestSessionId;
+            // Also auto-fill the guest history session field
+            const guestHistoryField = document.getElementById('guest-history-session');
+            if (guestHistoryField) {
+                guestHistoryField.value = guestSessionId;
+            }
+        }
+
+        function updateBaseUrl() {
+            baseUrl = document.getElementById('baseUrl').value;
+            localStorage.setItem('baseUrl', baseUrl);
+        }
+
+        function toggleSection(sectionId) {
+            const header = document.querySelector(`#${sectionId}`).previousElementSibling;
+            const content = document.getElementById(sectionId);
+
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        function updateAuthStatus() {
+            const statusElement = document.getElementById('authStatus');
+            const statusText = document.getElementById('authStatusText');
+            const currentUserElement = document.getElementById('currentUser');
+            const tokenStatus = document.getElementById('tokenStatus');
+
+            if (authToken && currentUser) {
+                statusElement.className = 'auth-status authenticated';
+                statusText.textContent = 'Authenticated';
+                currentUserElement.textContent = `${currentUser.firstName} ${currentUser.lastName}` || currentUser.email;
+                tokenStatus.textContent = 'Valid';
+            } else {
+                statusElement.className = 'auth-status unauthenticated';
+                statusText.textContent = 'Not Authenticated';
+                currentUserElement.textContent = 'None';
+                tokenStatus.textContent = 'None';
+            }
+        }
+
+        function updateGuestSession() {
+            const guestSessionElement = document.getElementById('guestSession');
+            const guestSessionIdElement = document.getElementById('guestSessionId');
+
+            if (guestSessionId) {
+                guestSessionElement.style.display = 'block';
+                guestSessionIdElement.textContent = guestSessionId;
+            } else {
+                guestSessionElement.style.display = 'none';
+            }
+        }
+
+        function getHeaders(includeAuth = true) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (includeAuth && authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            return headers;
+        }
+
+        function displayResponse(responseId, status, data, headers = {}) {
+            const responseElement = document.getElementById(responseId);
+            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
+
+            responseElement.innerHTML = `
+                <div class="response-header">
+                    <span class="status ${statusClass}">Status: ${status}</span>
+                    <button class="copy-button" onclick="copyResponse('${responseId}')">Copy</button>
+                </div>
+                <div class="response-body">${JSON.stringify(data, null, 2)}</div>
+            `;
+            responseElement.style.display = 'block';
+        }
+
+        function copyResponse(responseId) {
+            const responseBody = document.querySelector(`#${responseId} .response-body`);
+            navigator.clipboard.writeText(responseBody.textContent);
+        }
+
+        async function makeRequest(method, endpoint, data = null, responseId = '', includeAuth = true, customHeaders = {}) {
+            try {
+                const headers = { ...getHeaders(includeAuth), ...customHeaders };
+                const options = {
+                    method,
+                    headers
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${baseUrl}${endpoint}`, options);
+                const responseData = await response.json();
+
+                if (responseId) {
+                    displayResponse(responseId, response.status, responseData);
+                }
+
+                return { status: response.status, data: responseData };
+            } catch (error) {
+                if (responseId) {
+                    displayResponse(responseId, 0, { error: error.message });
+                }
+                throw error;
+            }
+        }
+
+        // Authentication Functions
+        async function register() {
+            const data = {
+                email: document.getElementById('register-email').value,
+                firstName: document.getElementById('register-firstName').value,
+                lastName: document.getElementById('register-lastName').value,
+                password: document.getElementById('register-password').value
+            };
+
+            await makeRequest('POST', '/auth/register', data, 'register-response', false);
+        }
+
+        async function login() {
+            const data = {
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            };
+
+            const response = await makeRequest('POST', '/auth/login', data, 'login-response', false);
+
+            if (response.status === 200 && response.data.token) {
+                authToken = response.data.token;
+                currentUser = response.data.user;
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateAuthStatus();
+            }
+        }
+
+        async function getProfile() {
+            await makeRequest('GET', '/auth/profile', null, 'profile-response');
+        }
+
+        async function updateProfile() {
+            const data = {
+                email: document.getElementById('update-email').value,
+                firstName: document.getElementById('update-firstName').value,
+                lastName: document.getElementById('update-lastName').value
+            };
+
+            // Remove empty fields
+            Object.keys(data).forEach(key => {
+                if (!data[key]) delete data[key];
+            });
+
+            const response = await makeRequest('PUT', '/auth/profile', data, 'update-profile-response');
+
+            if (response.status === 200) {
+                currentUser = response.data;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateAuthStatus();
+            }
+        }
+
+        async function changePassword() {
+            const data = {
+                currentPassword: document.getElementById('current-password').value,
+                newPassword: document.getElementById('new-password').value
+            };
+
+            await makeRequest('POST', '/auth/change-password', data, 'change-password-response');
+        }
+
+        async function logout() {
+            const response = await makeRequest('POST', '/auth/logout', null, 'logout-response');
+
+            if (response.status === 200) {
+                authToken = null;
+                currentUser = null;
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('currentUser');
+                updateAuthStatus();
+            }
+        }
+
+        // Chatbot Functions
+        let isStreamingEnabled = true;
+        let currentStreamingRequest = null;
+
+        function toggleStreaming() {
+            isStreamingEnabled = !isStreamingEnabled;
+            const toggle = document.getElementById('streamingToggle');
+            const status = document.getElementById('streamingStatus');
+
+            toggle.classList.toggle('active', isStreamingEnabled);
+            status.textContent = isStreamingEnabled ? 'Enabled (like ChatGPT)' : 'Disabled (regular)';
+        }
+
+        async function sendChatMessage() {
+            const message = document.getElementById('chat-message').value.trim();
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+
+            if (isStreamingEnabled) {
+                await sendStreamingMessage(message);
+            } else {
+                await sendRegularMessage(message);
+            }
+        }
+
+        async function sendStreamingMessage(message) {
+            const sendButton = document.getElementById('sendChatButton');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const streamingResponse = document.getElementById('streaming-response');
+            const streamingContent = document.getElementById('streaming-content');
+            const streamingStatus = document.getElementById('streaming-status');
+            const regularResponse = document.getElementById('chat-response');
+
+            try {
+                // Disable send button and show typing
+                sendButton.disabled = true;
+                sendButton.textContent = 'Streaming...';
+                typingIndicator.classList.add('active');
+                regularResponse.style.display = 'none';
+                streamingResponse.style.display = 'block';
+                streamingResponse.classList.add('active');
+                streamingStatus.style.display = 'block';
+                streamingStatus.className = 'streaming-status active';
+                document.getElementById('status-text').textContent = 'Connecting...';
+
+                // Prepare request data
+                const data = {
+                    message: message
+                };
+
+                let guestSession = document.getElementById('chat-guest-session').value;
+                const conversationId = document.getElementById('chat-conversation-id').value;
+
+                // Generate guest session if needed
+                if (!authToken && !guestSession) {
+                    guestSession = generateGuestId();
+                    document.getElementById('chat-guest-session').value = guestSession;
+                }
+
+                if (guestSession) {
+                    data.guestSessionId = guestSession;
+                }
+
+                if (conversationId) {
+                    data.conversationId = parseInt(conversationId);
+                }
+
+                // Prepare headers
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream',
+                };
+
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                if (guestSession) {
+                    headers['X-Guest-ID'] = guestSession;
+                }
+
+                // Make streaming request
+                const response = await fetch(`${baseUrl}/chatbot/chat/stream`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Hide typing indicator
+                typingIndicator.classList.remove('active');
+                document.getElementById('status-text').textContent = 'Streaming...';
+
+                // Initialize streaming content
+                streamingContent.innerHTML = '';
+                let fullResponse = '';
+
+                // Read the stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split('\n');
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+
+                                    switch (data.type) {
+                                        case 'start':
+                                            if (data.guestSessionId) {
+                                                guestSessionId = data.guestSessionId;
+                                                localStorage.setItem('guestSessionId', guestSessionId);
+                                                document.getElementById('chat-guest-session').value = guestSessionId;
+                                                updateGuestSession();
+                                            }
+                                            break;
+
+                                        case 'token':
+                                            fullResponse += data.token;
+                                            streamingContent.innerHTML = fullResponse + '<span class="cursor"></span>';
+                                            streamingResponse.scrollTop = streamingResponse.scrollHeight;
+                                            break;
+
+                                        case 'complete':
+                                            streamingContent.innerHTML = fullResponse;
+                                            streamingResponse.classList.remove('active');
+                                            streamingStatus.className = 'streaming-status active';
+                                            document.getElementById('status-text').textContent = 'Complete ✓';
+
+                                            // Handle metadata from completion
+                                            if (data.metadata) {
+                                                // Update guest session if provided
+                                                if (data.metadata.guestSessionId) {
+                                                    guestSessionId = data.metadata.guestSessionId;
+                                                    localStorage.setItem('guestSessionId', guestSessionId);
+                                                    document.getElementById('chat-guest-session').value = guestSessionId;
+                                                    updateGuestSession();
+                                                }
+
+                                                // Auto-populate conversation ID if new conversation was created
+                                                if (data.metadata.conversationId && data.metadata.isNewConversation) {
+                                                    document.getElementById('chat-conversation-id').value = data.metadata.conversationId;
+                                                    console.log('New conversation created with ID:', data.metadata.conversationId);
+
+                                                    // Show a subtle notification
+                                                    const statusText = document.getElementById('status-text');
+                                                    statusText.textContent = `Complete ✓ (New conversation #${data.metadata.conversationId})`;
+                                                }
+                                            }
+                                            break;
+
+                                        case 'error':
+                                            throw new Error(data.message);
+                                    }
+                                } catch (e) {
+                                    console.warn('Failed to parse SSE data:', line);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+
+            } catch (error) {
+                console.error('Streaming error:', error);
+                typingIndicator.classList.remove('active');
+                streamingStatus.className = 'streaming-status error';
+                document.getElementById('status-text').textContent = 'Error: ' + error.message;
+                streamingContent.innerHTML = `<span style="color: #dc3545;">❌ Error: ${error.message}</span>`;
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send Message';
+            }
+        }
+
+        async function sendRegularMessage(message) {
+            const data = {
+                message: message
+            };
+
+            let guestSession = document.getElementById('chat-guest-session').value;
+            const conversationId = document.getElementById('chat-conversation-id').value;
+
+            // If user is not authenticated and no guest session provided, generate one
+            if (!authToken && !guestSession) {
+                guestSession = generateGuestId();
+                document.getElementById('chat-guest-session').value = guestSession;
+                console.log('Generated new guest session:', guestSession);
+            }
+
+            // Prepare custom headers for guest session
+            let customHeaders = {};
+            if (guestSession) {
+                data.guestSessionId = guestSession;
+                customHeaders['X-Guest-ID'] = guestSession;
+            }
+
+            if (conversationId) {
+                data.conversationId = parseInt(conversationId);
+            }
+
+            // Hide streaming response, show regular response
+            document.getElementById('streaming-response').style.display = 'none';
+            document.getElementById('streaming-status').style.display = 'none';
+
+            const response = await makeRequest('POST', '/chatbot/chat', data, 'chat-response', true, customHeaders);
+
+            // Update guest session if returned
+            if (response.status === 200 && response.data.guestSessionId) {
+                guestSessionId = response.data.guestSessionId;
+                localStorage.setItem('guestSessionId', guestSessionId);
+
+                // Update the input field and display
+                document.getElementById('chat-guest-session').value = guestSessionId;
+                const guestHistoryField = document.getElementById('guest-history-session');
+                if (guestHistoryField) {
+                    guestHistoryField.value = guestSessionId;
+                }
+                updateGuestSession();
+
+                console.log('Guest session updated:', guestSessionId);
+            }
+
+            // Auto-populate conversation ID if new conversation was created
+            if (response.status === 200 && response.data.conversationId && response.data.isNewConversation) {
+                document.getElementById('chat-conversation-id').value = response.data.conversationId;
+                console.log('New conversation created with ID:', response.data.conversationId);
+            }
+        }
+
+        function generateGuestId() {
+            return 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function copyGuestId() {
+            const guestId = localStorage.getItem('guestSessionId');
+            if (guestId) {
+                navigator.clipboard.writeText(guestId);
+                alert('Guest ID copied to clipboard!');
+            }
+        }
+
+        function clearGuestSession() {
+            localStorage.removeItem('guestSessionId');
+            guestSessionId = null;
+            document.getElementById('chat-guest-session').value = '';
+            updateGuestSession();
+            alert('Guest session cleared!');
+        }
+
+        async function getGuestHistory() {
+            const sessionId = document.getElementById('guest-history-session').value;
+
+            if (!sessionId) {
+                alert('Please enter a guest session ID');
+                return;
+            }
+
+            // Send guest ID in header
+            const customHeaders = {
+                'X-Guest-ID': sessionId
+            };
+
+            await makeRequest('GET', '/chatbot/guest/history', null, 'guest-history-response', false, customHeaders);
+        }
+
+        async function getUserConversations() {
+            await makeRequest('GET', '/chatbot/conversations', null, 'user-conversations-response');
+        }
+
+        async function getConversationHistory() {
+            const conversationId = document.getElementById('conversation-history-id').value;
+            await makeRequest('GET', `/chatbot/conversations/${conversationId}/history`, null, 'conversation-history-response');
+        }
+
+        // Document Management Functions
+        async function uploadDocument() {
+            const title = document.getElementById('document-title').value;
+            const description = document.getElementById('document-description').value;
+            const fileInput = document.getElementById('document-file');
+            const file = fileInput.files[0];
+
+            if (!title || !file) {
+                alert('Please provide a title and select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            if (description) formData.append('description', description);
+            formData.append('file', file);
+
+            try {
+                const options = {
+                    method: 'POST',
+                    headers: {}
+                };
+
+                if (authToken) {
+                    options.headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${baseUrl}/documents/upload`, {
+                    ...options,
+                    body: formData
+                });
+
+                const responseData = await response.json();
+                displayResponse('upload-document-response', response.status, responseData);
+
+                if (response.status === 201) {
+                    // Clear form
+                    document.getElementById('document-title').value = '';
+                    document.getElementById('document-description').value = '';
+                    document.getElementById('document-file').value = '';
+                }
+            } catch (error) {
+                displayResponse('upload-document-response', 0, { error: error.message });
+            }
+        }
+
+        async function getDocuments() {
+            const page = document.getElementById('documents-page').value;
+            const limit = document.getElementById('documents-limit').value;
+            const type = document.getElementById('documents-type').value;
+            const isActive = document.getElementById('documents-active').value;
+
+            const params = new URLSearchParams();
+            if (page) params.append('page', page);
+            if (limit) params.append('limit', limit);
+            if (type) params.append('type', type);
+            if (isActive) params.append('isActive', isActive);
+
+            const queryString = params.toString();
+            const endpoint = `/documents${queryString ? '?' + queryString : ''}`;
+
+            await makeRequest('GET', endpoint, null, 'get-documents-response');
+        }
+
+        async function updateDocument() {
+            const id = document.getElementById('update-document-id').value;
+            const title = document.getElementById('update-document-title').value;
+            const description = document.getElementById('update-document-description').value;
+            const isActive = document.getElementById('update-document-active').value;
+
+            if (!id) {
+                alert('Please provide a document ID');
+                return;
+            }
+
+            const data = {};
+            if (title) data.title = title;
+            if (description) data.description = description;
+            if (isActive !== '') data.isActive = isActive === 'true';
+
+            await makeRequest('PUT', `/documents/${id}`, data, 'update-document-response');
+        }
+
+        async function setActiveDocuments() {
+            const idsString = document.getElementById('active-document-ids').value;
+
+            if (!idsString) {
+                alert('Please provide document IDs');
+                return;
+            }
+
+            const documentIds = idsString.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+
+            if (documentIds.length === 0) {
+                alert('Please provide valid document IDs');
+                return;
+            }
+
+            const data = { documentIds };
+            await makeRequest('POST', '/documents/set-active', data, 'set-active-documents-response');
+        }
+
+        async function getActiveDocuments() {
+            await makeRequest('GET', '/documents/active', null, 'get-active-documents-response');
+        }
+
+        async function deleteDocument() {
+            const id = document.getElementById('delete-document-id').value;
+
+            if (!id) {
+                alert('Please provide a document ID');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this document?')) {
+                return;
+            }
+
+            await makeRequest('DELETE', `/documents/${id}`, null, 'delete-document-response');
+        }
+
+        async function searchDocuments() {
+            const query = document.getElementById('search-query').value;
+
+            if (!query) {
+                alert('Please provide a search query');
+                return;
+            }
+
+            await makeRequest('GET', `/documents/search/${encodeURIComponent(query)}`, null, 'search-documents-response');
+        }
+
+        // Load saved base URL
+        const savedBaseUrl = localStorage.getItem('baseUrl');
+        if (savedBaseUrl) {
+            baseUrl = savedBaseUrl;
+            document.getElementById('baseUrl').value = baseUrl;
+        }
+
+        // Quick test functions
+        function fillTestData() {
+            // Fill register form
+            document.getElementById('register-username').value = 'testuser';
+            document.getElementById('register-email').value = 'test@example.com';
+            document.getElementById('register-password').value = 'password123';
+            document.getElementById('register-fullname').value = 'Test User';
+
+            // Fill login form
+            document.getElementById('login-email').value = 'test@example.com';
+            document.getElementById('login-password').value = 'password123';
+
+            // Fill chat message
+            document.getElementById('chat-message').value = 'Tôi có thể lái xe máy khi chưa đủ 18 tuổi không?';
+        }
+
+        // RAG Test Functions
+        function testPenaltyQuery() {
+            document.getElementById('chat-message').value = 'Vượt đèn đỏ bị phạt bao nhiêu tiền?';
+            console.log('RAG Test: Penalty query loaded (should use full documents)');
+        }
+
+        function testGeneralQuery() {
+            document.getElementById('chat-message').value = 'Tôi có thể lái xe máy không?';
+            console.log('RAG Test: General query loaded (should use RAG chunks)');
+        }
+
+        function testGreeting() {
+            document.getElementById('chat-message').value = 'Xin chào';
+            console.log('RAG Test: Greeting loaded (should respond with greeting)');
+        }
+
+        function testEnglishQuery() {
+            document.getElementById('chat-message').value = 'What is the speed limit on highways in Vietnam?';
+            console.log('RAG Test: English query loaded (should respond in English)');
+        }
+
+        // Auto-fill test data on page load for development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            fillTestData();
+        }
+    </script>
+</body>
+
+</html>

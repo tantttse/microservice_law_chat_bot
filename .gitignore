@@ -1,0 +1,17 @@
+# Gateway service
+Gateway/node_modules/
+Gateway/dist/
+Gateway/.env
+Gateway/app_error.log
+
+# ServiceChatBot
+ServiceChatBot/node_modules/
+ServiceChatBot/dist/
+ServiceChatBot/.env
+ServiceChatBot/app_error.log
+
+# ServiceUser
+ServiceUser/node_modules/
+ServiceUser/dist/
+ServiceUser/.env
+ServiceUser/app_error.log

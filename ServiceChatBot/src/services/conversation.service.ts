@@ -1,0 +1,71 @@
+import { BaseService } from '../common/interfaces/base.interface';
+import { ConversationRepository } from '../repository/conversation.repository';
+import { ConversationResponseDto, CreateConversationDto, UpdateConversationDto } from '../common/dtos/conversation.dto';
+import { PaginationQueryDto, PaginatedResponseDto } from '../common/dtos/pagination.dto';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
+import { AppError } from '../common/errors/app-errors';
+
+export class ConversationService {
+    private repository: ConversationRepository;
+
+    constructor() {
+        this.repository = new ConversationRepository();
+    }
+
+    async create(data: CreateConversationDto): Promise<ConversationResponseDto> {
+        // Validate DTO
+        const errors = await validate(plainToClass(CreateConversationDto, data));
+        if (errors.length > 0) {
+            throw new AppError('Validation failed', 400, 'Validation failed', true, errors);
+        }
+
+        const conversation = await this.repository.create(data);
+        return plainToClass(ConversationResponseDto, conversation, { excludeExtraneousValues: true });
+    }
+
+    async findById(id: number): Promise<ConversationResponseDto> {
+        const conversation = await this.repository.findById(id);
+        if (!conversation) {
+            throw new AppError('Conversation not found', 404, 'Conversation not found', true);
+        }
+        return plainToClass(ConversationResponseDto, conversation, { excludeExtraneousValues: true });
+    }
+
+    async findAll(query: PaginationQueryDto): Promise<PaginatedResponseDto<ConversationResponseDto>> {
+        const { data, total } = await this.repository.findAll(query);
+        const conversations = data.map(conversation => 
+            plainToClass(ConversationResponseDto, conversation, { excludeExtraneousValues: true })
+        );        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const lastPage = Math.ceil(total / limit);
+        
+        return {
+            data: conversations,
+            meta: {
+                total,
+                page,
+                lastPage,
+                hasNextPage: page < lastPage,
+                hasPreviousPage: page > 1
+            }
+        };
+    }
+
+    async update(id: number, data: UpdateConversationDto): Promise<ConversationResponseDto> {
+        // Validate DTO
+        const errors = await validate(plainToClass(UpdateConversationDto, data));
+        if (errors.length > 0) {
+            throw new AppError('Validation failed', 400, 'Validation failed', true, errors);
+        }
+
+        const conversation = await this.repository.update(id, data);
+        return plainToClass(ConversationResponseDto, conversation, { excludeExtraneousValues: true });
+    }
+
+    async delete(id: number): Promise<void> {
+        await this.repository.delete(id);
+    }
+
+   
+}

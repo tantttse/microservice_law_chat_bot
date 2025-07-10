@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// chat-service/prisma/schema.prisma
+
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  userId    Int       // Just the ID from the user-service
+  title     String?
+  createdAt DateTime
+  createdBy String?
+  updatedAt DateTime
+  updatedBy String?
+
+  messages  Message[]
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  question       String       @db.Text
+  answer         String       @db.Text
+  createdAt      DateTime
+  createdBy      String?
+  updatedAt      DateTime
+  updatedBy      String?
+}
+
+model Document {
+  id               Int      @id @default(autoincrement())
+  title            String   @db.VarChar(255)
+  filename         String   @db.VarChar(255)
+  originalFilename String   @db.VarChar(255)
+  path             String   @db.VarChar(500)
+  type             String   @db.VarChar(10)
+  size             Int
+  isActive         Boolean  @default(false)
+  description      String?  @db.Text
+  uploader         Int     
+  createdAt        DateTime @default(now())
+  createdBy        String?
+  updatedAt        DateTime @updatedAt
+  updatedBy        String?
+
+  @@map("documents")
+}
