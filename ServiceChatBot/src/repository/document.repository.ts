@@ -40,32 +40,12 @@ export class DocumentRepository {
         createdBy: `user_${data.uploadedBy}`,
         updatedBy: `user_${data.uploadedBy}`,
       },
-      include: {
-        uploader: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
     });
   }
 
   async findById(id: number) {
     return (prisma.document as any).findUnique({
       where: { id },
-      include: {
-        uploader: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
     });
   }
 
@@ -93,16 +73,6 @@ export class DocumentRepository {
         where,
         skip,
         take: limit,
-        include: {
-          uploader: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
         orderBy: {
           createdAt: "desc",
         },
@@ -126,7 +96,7 @@ export class DocumentRepository {
 
   async findActiveDocuments() {
     return (prisma.document as any).findMany({
-      where: { isActive: true   },
+      where: { isActive: true },
       // include: {
       //   uploader: {
       //     select: {
@@ -149,16 +119,6 @@ export class DocumentRepository {
       data: {
         ...data,
         updatedAt: new Date(),
-      },
-      include: {
-        uploader: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
       },
     });
   }
@@ -220,16 +180,6 @@ export class DocumentRepository {
             },
           },
         ],
-      },
-      include: {
-        uploader: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
       },
     });
   }

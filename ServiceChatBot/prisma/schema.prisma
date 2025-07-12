@@ -50,7 +50,7 @@ model Document {
   size             Int
   isActive         Boolean  @default(false)
   description      String?  @db.Text
-  uploader         Int     
+  uploadedBy       Int      // Just store user ID from User service
   createdAt        DateTime @default(now())
   createdBy        String?
   updatedAt        DateTime @updatedAt
