@@ -8,23 +8,30 @@ type ServiceMap = {
 export function setupProxyRoutes(app: Application, services: ServiceMap): void {
   Object.entries(services).forEach(([routePrefix, target]) => {
     console.log(`Mounting proxy: /${routePrefix} -> ${target}`);
-    app.use(`/${routePrefix}`, proxy(target, {
-      proxyReqPathResolver: (req: Request) => {
-        console.log(`Incoming request to: ${req.originalUrl}`);
-        return req.url;
-      },
-      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-        const user = (srcReq as any).user;
-        const headers = proxyReqOpts.headers as Record<string, string>;
+    app.use(
+      `/${routePrefix}`,
+      proxy(target, {
+        proxyReqPathResolver: (req: Request) => {
+          console.log(`Incoming request to: ${req.originalUrl}`);
+          return req.url;
+        },
+        proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+          const user = (srcReq as any).user;
+          const headers = proxyReqOpts.headers as Record<string, string>;
 
-        if (user) {
-          headers['x-user-id'] = user.userId.toString();
-          headers['x-user-email'] = user.email;
-          headers['x-user-admin'] = user.isAdmin.toString();
-        }
+          if (user) {
+            headers["x-user-id"] = user.userId.toString();
+            headers["x-user-email"] = user.email;
+            headers["x-user-admin"] = user.isAdmin.toString();
+          }
 
-        return proxyReqOpts;
-      }
-    }));
+          return proxyReqOpts;
+        },
+        // Handle multipart form data properly
+        parseReqBody: false, // Don't parse request body for file uploads
+        limit: "50mb", // Increase body size limit
+        timeout: 30000, // 30 second timeout for file uploads
+      })
+    );
   });
 }

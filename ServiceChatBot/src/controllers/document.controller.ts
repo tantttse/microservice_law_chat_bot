@@ -12,9 +12,17 @@ import {
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fieldSize: 1 * 1024 * 1024, // 1MB field size limit
+    files: 1, // Allow only 1 file
+    fields: 10, // Allow up to 10 non-file fields
   },
   fileFilter: (req, file, cb) => {
+    console.log("File filter called:", {
+      fieldname: file.fieldname,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+    });
+
     const allowedMimes = [
       "text/plain",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -54,7 +62,7 @@ export class DocumentController {
       }
 
       // Get user ID from authenticated user
-      const userId = parseInt(req.headers['x-user-id'] as string)
+      const userId = parseInt(req.headers["x-user-id"] as string);
       if (!userId) {
         throw new APIError("UNAUTHORIZED", 401, "User not authenticated");
       }
@@ -232,7 +240,7 @@ export class DocumentController {
       }
 
       // Get user ID from authenticated user
-      const userId = parseInt(req.headers['x-user-id'] as string)
+      const userId = parseInt(req.headers["x-user-id"] as string);
       if (!userId) {
         throw new APIError("UNAUTHORIZED", 401, "User not authenticated");
       }
@@ -297,13 +305,13 @@ export class DocumentController {
       }
 
       const { id } = req.params;
-      const userId = parseInt(req.headers['x-user-id'] as string)
+      const userId = parseInt(req.headers["x-user-id"] as string);
 
       if (!userId) {
         throw new APIError("UNAUTHORIZED", 401, "User not authenticated");
       }
 
-      const isAdmin = req.headers['x-user-admin'] === 'true';
+      const isAdmin = req.headers["x-user-admin"] === "true";
       // Check if user is admin
       if (!isAdmin) {
         throw new APIError("FORBIDDEN", 403, "Admin access required");
