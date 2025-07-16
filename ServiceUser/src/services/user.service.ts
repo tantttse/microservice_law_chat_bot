@@ -7,8 +7,7 @@ import { PaginationQueryDto } from "../common/dtos/pagination.dto";
 import { UserRepository } from "../repository/user.repository";
 import { plainToClass } from "class-transformer";
 import { APIError } from "../common/errors/app-errors";
-
-export class UserService {
+export class UserService  {
   private repository: UserRepository;
 
   constructor() {

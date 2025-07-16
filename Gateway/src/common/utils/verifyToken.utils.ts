@@ -26,3 +26,11 @@ export function verifyToken(token: string): TokenPayload {
     throw new APIError("INVALID_TOKEN", 401, "Invalid or expired token");
   }
 }
+
+
+export const extractToken = (authHeader?: string): string | null => {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+  return authHeader.split(" ")[1];
+};

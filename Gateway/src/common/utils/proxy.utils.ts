@@ -6,11 +6,14 @@ type ServiceMap = {
 };
 
 export function setupProxyRoutes(app: Application, services: ServiceMap): void {
+
   Object.entries(services).forEach(([routePrefix, target]) => {
     console.log(`Mounting proxy: /${routePrefix} -> ${target}`);
 
     // Debug middleware to see what routes are being hit
     app.use(`/${routePrefix}`, (req, res, next) => {
+      console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+      console.log(`Incoming request headers:`, req.headers); 
       next();
     });
 
@@ -21,23 +24,22 @@ export function setupProxyRoutes(app: Application, services: ServiceMap): void {
         proxyReqPathResolver: (req: Request) => {
           const targetPath = req.originalUrl.replace(`/${routePrefix}`, "");
           console.log(
-            `File upload request to: ${req.originalUrl}, forwarding to: ${targetPath}`
+            `File upload request: ${req.method} ${req.originalUrl} -> ${target}${targetPath}`
           );
           return targetPath;
         },
         proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
           const user = (srcReq as any).user;
           const headers = proxyReqOpts.headers as Record<string, string>;
-
           if (user) {
             headers["x-user-id"] = user.userId.toString();
             headers["x-user-email"] = user.email;
             headers["x-user-admin"] = user.isAdmin.toString();
-          }
+          } 
 
           return proxyReqOpts;
         },
-        parseReqBody: false, // Don't parse body for file uploads
+        parseReqBody: false, 
         limit: "50mb",
         timeout: 30000,
       })
@@ -50,7 +52,7 @@ export function setupProxyRoutes(app: Application, services: ServiceMap): void {
         proxyReqPathResolver: (req: Request) => {
           const targetPath = req.originalUrl.replace(`/${routePrefix}`, "");
           console.log(
-            `Regular request to: ${req.originalUrl}, forwarding to: ${targetPath}`
+            `Regular request: ${req.method} ${req.originalUrl} -> ${target}${targetPath}`
           );
           return targetPath;
         },
@@ -62,14 +64,18 @@ export function setupProxyRoutes(app: Application, services: ServiceMap): void {
             headers["x-user-id"] = user.userId.toString();
             headers["x-user-email"] = user.email;
             headers["x-user-admin"] = user.isAdmin.toString();
-          }
+            console.log(`Default proxy - Headers set:`, {
+              "x-user-id": headers["x-user-id"],
+              "x-user-email": headers["x-user-email"],
+              "x-user-admin": headers["x-user-admin"],
+            }); 
+          } 
 
           return proxyReqOpts;
         },
-        // Parse body for JSON requests, don't parse for file uploads
-        parseReqBody: true, // Enable body parsing for JSON requests
-        limit: "50mb", // Increase body size limit
-        timeout: 30000, // 30 second timeout
+        parseReqBody: true,
+        limit: "50mb",
+        timeout: 30000,
       })
     );
   });
